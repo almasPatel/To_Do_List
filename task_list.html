@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+
+        #tasks-container {
+            width: 80%;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        #tasks-container.dark-mode {
+            background-color: #333;
+        }
+
+        #tasks-container.dark-mode h2 {
+            background-color: #212121;
+            color: #fff;
+        }
+
+        #tasks-container.dark-mode #tasks-form,
+        #tasks-container.dark-mode .task {
+            background-color: #444;
+            color: #fff;
+        }
+
+        #tasks-container.dark-mode #tasks-form input,
+        #tasks-container.dark-mode #tasks-form select,
+        #tasks-container.dark-mode #addTaskBtn,
+        #darkModeToggleBtn {
+            border: 1px solid #555;
+            background-color: #666;
+            color: #fff;
+        }
+
+        #tasks-container.dark-mode #tasks-form input:focus,
+        #tasks-container.dark-mode #tasks-form select:focus,
+        #tasks-container.dark-mode #addTaskBtn:focus,
+        #darkModeToggleBtn:focus {
+            outline: none;
+            border: 1px solid #777;
+        }
+
+        #tasks-container.dark-mode #taskList .task:hover {
+            background-color: #555;
+        }
+
+        #tasks-container h2 {
+            background-color: #4285f4;
+            color: #fff;
+            padding: 15px;
+            margin: 0;
+            font-size: 2rem;
+            text-align: center;
+            border-bottom: 2px solid #fff;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease;
+        }
+
+        #tasks-form {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        #taskDescription, #taskDeadline, #taskPriority, #addTaskBtn {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex: 1;
+            margin-bottom: 10px;
+        }
+
+        #addTaskBtn, #darkModeToggleBtn {
+            background-color: #4285f4;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            flex-basis: 100%;
+        }
+
+        #addTaskBtn:hover, #darkModeToggleBtn:hover {
+            background-color: #3367d6;
+        }
+
+        #taskList {
+            padding: 15px;
+        }
+
+        .task {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .task:hover {
+            background-color: #f0f0f0;
+        }
+
+        .task label {
+            margin-right: 10px;
+            flex-grow: 1;
+        }
+
+        .task-number {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .priority-high {
+            background-color: #ffcccc;
+        }
+
+        .priority-medium {
+            background-color: #ffffcc;
+        }
+
+        .priority-low {
+            background-color: #ccffcc;
+        }
+
+        .remove-btn {
+            background-color: #ff4d4d;
+            color: #fff;
+            cursor: pointer;
+            border: none;
+            padding: 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .remove-btn:hover {
+            background-color: #cc0000;
+        }
+    </style>
+    <title>Task Manager</title>
+</head>
+<body>
+    <div id="tasks-container">
+        <h2>Task Manager</h2>
+        <button id="darkModeToggleBtn" onclick="toggleDarkMode()">Dark Mode</button>
+        <div id="tasks-form">
+            <label for="taskDescription">Task Description:</label>
+            <input type="text" id="taskDescription" />
+            <label for="taskDeadline">Deadline:</label>
+            <input type="date" id="taskDeadline" />
+            <label for="taskPriority">Priority:</label>
+            <select id="taskPriority">
+                <option value="HIGH">High</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="LOW">Low</option>
+            </select>
+            <button id="addTaskBtn" onclick="addTask()">Add Task</button>
+        </div>
+        <div id="taskList"></div>
+    </div>
+
+    <script>
+        let taskCounter = 1;
+
+        function addRemoveButton(taskDiv) {
+            var removeBtn = document.createElement('button');
+            removeBtn.classList.add('remove-btn');
+            removeBtn.textContent = 'Remove';
+            removeBtn.onclick = function () {
+                removeTask(taskDiv);
+            };
+            taskDiv.appendChild(removeBtn);
+        }
+
+        function removeTask(taskDiv) {
+            var taskList = document.getElementById('taskList');
+            taskList.removeChild(taskDiv);
+        }
+
+        function addTask() {
+            var description = document.getElementById('taskDescription').value;
+            var deadline = document.getElementById('taskDeadline').value;
+            var priority = document.getElementById('taskPriority').value;
+
+            if (description && deadline) {
+                if (!isTaskDuplicate(description, deadline, priority)) {
+                    var taskList = document.getElementById('taskList');
+                    var taskDiv = document.createElement('div');
+                    taskDiv.classList.add('task');
+                    taskDiv.classList.add('priority-' + priority.toLowerCase());
+
+                    var taskNumber = document.createElement('div');
+                    taskNumber.classList.add('task-number');
+                    taskNumber.textContent = taskCounter++;
+
+                    var taskLabel = document.createElement('label');
+                    taskLabel.textContent = description;
+
+                    var deadlineLabel = document.createElement('label');
+                    deadlineLabel.textContent = 'Deadline: ' + deadline;
+
+                    var priorityLabel = document.createElement('label');
+                    priorityLabel.textContent = 'Priority: ' + priority;
+
+                    taskDiv.appendChild(taskNumber);
+                    taskDiv.appendChild(taskLabel);
+                    taskDiv.appendChild(deadlineLabel);
+                    taskDiv.appendChild(priorityLabel);
+
+                    taskList.appendChild(taskDiv);
+
+                    addRemoveButton(taskDiv);
+
+                    document.getElementById('taskDescription').value = '';
+                    document.getElementById('taskDeadline').value = '';
+                    document.getElementById('taskPriority').value = 'HIGH';
+                } else {
+                    alert('Task already exists!');
+                }
+            }
+        }
+
+        function isTaskDuplicate(description, deadline, priority) {
+            var tasks = document.querySelectorAll('.task');
+            for (var i = 0; i < tasks.length; i++) {
+                var task = tasks[i];
+                var taskDescription = task.querySelector('label').textContent;
+                var taskDeadline = task.querySelector(':nth-child(3)').textContent.split(': ')[1];
+                var taskPriority = task.querySelector(':nth-child(4)').textContent.split(': ')[1].toLowerCase();
+
+                if (
+                    taskDescription === description &&
+                    taskDeadline === deadline &&
+                    taskPriority === priority.toLowerCase()
+                ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function toggleDarkMode() {
+            var tasksContainer = document.getElementById('tasks-container');
+            tasksContainer.classList.toggle('dark-mode');
+        }
+    </script>
+</body>
+</html>
